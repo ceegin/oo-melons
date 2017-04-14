@@ -1,6 +1,7 @@
 """Classes for melon orders."""
 
 from random import randint
+from datetime import datetime
 
 class AbstractMelonOrder(object):
     """Base melon order class"""
@@ -21,9 +22,14 @@ class AbstractMelonOrder(object):
         """Calculate price, including tax."""
 
         base_price = self.get_base_price()
+        rush_fee = 0
+        now = datetime.now()
+        if now.hour >= 8 and now.hour <=11:
+            if datetime.weekday(now) >= 0 and datetime.weekday(now) <=4:
+                rush_fee = 4
         if self.species == "Christmas":
             base_price = base_price * 1.5
-        total = (1 + self.tax) * self.qty * base_price
+        total = ((1 + self.tax) * self.qty * base_price) + rush_fee
 
         return round(total, 2)
 
@@ -36,7 +42,6 @@ class AbstractMelonOrder(object):
         """Return the country code."""
         return self.country_code
 
-   
 
 class DomesticMelonOrder(AbstractMelonOrder):
     """A melon order within the USA."""
@@ -44,7 +49,8 @@ class DomesticMelonOrder(AbstractMelonOrder):
     def __init__(self, species, qty):
         """Initializes new domestic melon order"""
 
-        super(DomesticMelonOrder, self).__init__(species, qty, "USA", "domestic", 0.08)
+        super(DomesticMelonOrder, self).__init__(species, qty, "USA", "domestic", tax=0.08)
+
 
 class InternationalMelonOrder(AbstractMelonOrder):
     """An international (non-US) melon order."""
@@ -53,7 +59,6 @@ class InternationalMelonOrder(AbstractMelonOrder):
         """Initializes new domestic melon order"""
 
         super(InternationalMelonOrder, self).__init__(species, qty, country_code, "international", 0.17)
-
 
     def get_total(self):
         """Calculate price, including tax."""
@@ -65,21 +70,15 @@ class InternationalMelonOrder(AbstractMelonOrder):
 
         return round(result, 2)
 
-class GovernmentMelonOrder(DomesticMelonOrder):
+
+class GovernmentMelonOrder(AbstractMelonOrder):
     """A governmental melon order"""
+    
+    def __init__(self, species, qty):
+        """Initializes new domestic melon order"""
+        super(GovernmentMelonOrder, self).__init__(species, qty, "USA", "domestic", tax=0)
 
     passed_inspection = False
     def mark_inspection(self, passed):
+        """Updates inspection status"""
         self.passed_inspection = passed
-
-
-test = DomesticMelonOrder("watermelon", 6)
-test11 = DomesticMelonOrder("watermelon", 6)
-test12 = DomesticMelonOrder("watermelon", 6)
-test13 = DomesticMelonOrder("watermelon", 6)
-test14 = DomesticMelonOrder("watermelon", 6)
-test15 = DomesticMelonOrder("watermelon", 6)
-test2 = DomesticMelonOrder('watermelon', 6)
-test3 = InternationalMelonOrder("watermelon", 6, "AUS")
-test4 = InternationalMelonOrder("watermelon", 6, "AUS")
-test5 = GovernmentMelonOrder("watermelon", 6)
